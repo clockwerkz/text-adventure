@@ -1,0 +1,28 @@
+{
+  "name": "text-adventure",
+  "version": "1.0.0",
+  "description": "A text based adventure game that uses Node/Express as a back end, and Mongo DB as central repository for the game.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clockwerkz/text-adventure.git"
+  },
+  "keywords": [
+    "Adventure",
+    "Game",
+    "Co-VidGameJam"
+  ],
+  "author": "clockwerkz, nerdiestMaxiumus",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/clockwerkz/text-adventure/issues"
+  },
+  "homepage": "https://github.com/clockwerkz/text-adventure#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.9.6"
+  }
+}
