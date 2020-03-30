@@ -1,22 +1,8 @@
-console.log('client app connected');
-const title = document.getElementById('title');
-const description = document.getElementById('description');
-const items = document.getElementById('items');
-const locations = document.getElementById('locations');
 const playerInput = document.getElementById('player-input');
 
-playerInput.addEventListener('submit', (e)=> {
-    e.preventDefault();
-    const playerText = document.getElementById('input-text');
-    console.log(playerText.value);
-}); 
-
 class gameEngine {
-    constructor(title, description, items, locations) {
-        this.title = title;
-        this.description = description;
-        this.items = items;
-        this.locations = locations;
+    constructor(appRoot) {
+        this.app = appRoot;
         this.fetchLocation();
     }
 
@@ -31,10 +17,12 @@ class gameEngine {
     }
 
     render({ title, description, items, locations }) {
-        this.title.textContent = title;
-        this.description.textContent = description;
-        this.items.textContent = this.renderItems(items);
-        this.locations.textContent = this.renderLocations(locations);
+        this.app.innerHTML = `
+        <h1 id="title">${title}</h1>
+        <p id="description">${description}</p>
+        <p id="items">${this.renderItems(items)}</p>
+        <p id="locations">${this.renderLocations(locations)}</p>
+        `;
     }
 
     renderItems(items) {
@@ -47,12 +35,17 @@ class gameEngine {
     }
 
     parseInput(input) {
-        this.fetchLocation(input);
+        const inputArr = input.split('');
+        let cmd = inputArr;
+        switch(cmd) {
+            default: 
+            this.fetchLocation(cmd);
+        }
     }
 }
 
 
-const game = new gameEngine(title, description, items, locations);
+const game = new gameEngine(document.getElementById('app-root'));
 
 playerInput.addEventListener('submit', (e)=> {
     e.preventDefault();
