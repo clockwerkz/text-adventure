@@ -53,7 +53,7 @@ rooms = {
 const playerInput = document.getElementById('player-input');
 const app = document.getElementById('app-root');
 const inventory = [];
-
+const unlocked = [];
 
 function render(route, descriptionOnly = false) {
     let room = rooms[route];
@@ -113,6 +113,8 @@ function parseMultiCmd([ cmd, obj ]) {
                 renderPartial(`There is no ${obj} here.`);
             }
             break;
+        case 'use':
+          break;
         default:
     }
 }
