@@ -1,7 +1,12 @@
 rooms = {
     'a': {
       title: 'Room A',
-      description: 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is closed.',
+      description: {
+        default: 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is closed.',
+        conditionals: {
+          'closet_unlocked' : 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is now open.'
+        }
+      },
       routes: {
         'b':{
         locked: false,
