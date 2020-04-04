@@ -4,7 +4,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const game = require('./game/data');
 
-app.use(express.static('public'))
+//app.use(express.static('public'));
+
+app.use('/', express.static(__dirname + '/playground'));
 
 app.get('/api/game', (req,res)=> {
     res.send({msg:'Message from the game api!'});
