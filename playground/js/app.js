@@ -33,17 +33,34 @@ rooms = {
         }
       },
       items: ['key']
+    },
+    'closet': {
+      title: 'The Closet',
+      status: 'default',
+      description: {
+        'default': 'You made it into the closet, there are a lot of skeletons in here. There is only one way out to the West, back to Room A.'
+      },
+      routes: {
+        'a':{
+        locked: false,
+        },
+      },
     }
   }
   
   const items = {
     'key': {
       description: 'A worn out brass key with no other indications on it, appears to be a key for an indoor lock.',
-      use: {
-        'a': 'closet_unlocked'
+      statusChange: {
+        'a': 'closet_unlocked',
+        'b': 'noKey'
       },
-      roomChange: 'noKey',
-      message: 'You unlocked the closet door.'
+      routeOpen: {
+        'a': 'closet'
+      },
+      message: {
+        'a':'You unlocked the closet door.'
+      }
     }
   }
 
@@ -73,6 +90,7 @@ function renderPartial(str) {
 
 function parseInstruction(input) {
     let arr = input.trim().split(' ');
+    arr = arr.map(item => item.toLowerCase());
     console.log(arr);
     if (arr.length === 1) parseOneCmd(arr[0]);
     else return parseMultiCmd(arr);
@@ -98,7 +116,7 @@ function parseMultiCmd([ cmd, obj ]) {
             console.log(current);
             inventory.push(obj);
             renderPartial(`You take the ${obj}.`);
-            visitedRooms[current].status = items[obj].roomChange;
+            visitedRooms[current].status = items[obj].statusChange[current];
             console.log(visitedRooms[current]);
         } else {
             renderPartial(`${obj} is not present here.`);
@@ -109,7 +127,12 @@ function parseMultiCmd([ cmd, obj ]) {
         case 'visit':
 
           if (isValidLocation(obj)) {
+            if (!visitedRooms[current].routes[obj].locked) {
               visitLocation(obj);
+            } else {
+              console.log(visitedRooms[current].routes[obj]);
+              renderPartial(visitedRooms[current].routes[obj].message);
+            }
           }
           break;
         case 'examine':
@@ -120,6 +143,20 @@ function parseMultiCmd([ cmd, obj ]) {
             }
             break;
         case 'use':
+            if (inventory.indexOf(obj)!==-1) {
+              if (items[obj].statusChange.hasOwnProperty(current)) {
+                item = items[obj];
+                if (item.routeOpen.hasOwnProperty(current)) {
+                  let unlockRoom = item.routeOpen[current];
+                  console.log(unlockRoom);
+                  visitedRooms[current].routes[unlockRoom].locked = false;
+                }
+                visitedRooms[current].status = item.statusChange[current];
+                renderPartial(item.message[current]);
+              }
+            } else {
+              renderPartial(`You do not have ${obj}`);
+            }
           break;
         default:
     }
