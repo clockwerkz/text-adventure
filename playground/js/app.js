@@ -1,11 +1,10 @@
 rooms = {
     'a': {
       title: 'Room A',
+      status: 'default',
       description: {
-        default: 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is closed.',
-        conditionals: {
-          'closet_unlocked' : 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is now open.'
-        }
+        'default': 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is closed.',
+        'closet_unlocked' : 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is now open.'
       },
       routes: {
         'b':{
@@ -17,21 +16,13 @@ rooms = {
         }
       },
     },
-    'a_unlocked': {
-      title: 'Room A',
-      description: 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is now open.',
-      routes: {
-        'b':{
-        locked: false
-        },
-        'closet': {
-        locked: false
-        }
-      },
-    },
     'b': {
       title: 'Room B',
-      description: 'You are in a room. Room A is through the open door to the south. On the floor nearby there is a key.',
+      status: 'default',
+      description: {
+        'default': 'You are in a room. Room A is through the open door to the south. On the floor nearby there is a key.',
+        'noKey': 'You are in a room. Room A is through the open door to the south.'
+      },
       routes: {
         'a':{
         locked: false,
@@ -48,7 +39,10 @@ rooms = {
   const items = {
     'key': {
       description: 'A worn out brass key with no other indications on it, appears to be a key for an indoor lock.',
-      use: ['a'],
+      use: {
+        'a': 'closet_unlocked'
+      },
+      roomChange: 'noKey',
       message: 'You unlocked the closet door.'
     }
   }
@@ -59,12 +53,15 @@ const playerInput = document.getElementById('player-input');
 const app = document.getElementById('app-root');
 const inventory = [];
 const unlocked = [];
+let current = '';
+const visitedRooms = {};
 
-function render(route, descriptionOnly = false) {
-    let room = rooms[route];
+
+function render(room, descriptionOnly = false) {
+  let status = room.status;
     let desc = `
         ${descriptionOnly ? '' : '<h2>'+room.title+'</h2>'}
-        <p>${room.description}</p>
+        <p>${room.description[status]}</p>
     `;
     app.innerHTML += desc;
 } 
@@ -97,9 +94,12 @@ function parseMultiCmd([ cmd, obj ]) {
         case 'take':
         case 'get':
         case 'grab':
-        if (isValidItem(obj)) {
+          if (isValidItem(obj)) {
+            console.log(current);
             inventory.push(obj);
             renderPartial(`You take the ${obj}.`);
+            visitedRooms[current].status = items[obj].roomChange;
+            console.log(visitedRooms[current]);
         } else {
             renderPartial(`${obj} is not present here.`);
         }
@@ -107,10 +107,11 @@ function parseMultiCmd([ cmd, obj ]) {
         break;
         case 'goto':
         case 'visit':
-            if (isValidLocation(obj)) {
-                visitLocation(obj);
-            }
-            break;
+
+          if (isValidLocation(obj)) {
+              visitLocation(obj);
+          }
+          break;
         case 'examine':
             if (isValidItem(obj)) {
                 renderPartial(items[obj].description);
@@ -126,12 +127,16 @@ function parseMultiCmd([ cmd, obj ]) {
 
 function visitLocation(room) {
     current = room;
-    render(room);
+    if (!visitedRooms.hasOwnProperty(current)) {
+      visitedRooms[current] = rooms[current];
+      console.log(visitedRooms);
+    } 
+    render(visitedRooms[current]);
   }
 
 
 function isValidItem(item) {
-    return items.hasOwnProperty(item) &&  rooms[current].hasOwnProperty(items) && rooms[current].items.indexOf(item) !== -1;
+    return items.hasOwnProperty(item) &&  visitedRooms[current].hasOwnProperty('items') && visitedRooms[current].items.indexOf(item) !== -1;
 }
 
 
@@ -149,5 +154,5 @@ playerInput.addEventListener('submit', (e)=> {
 
 
 
-let current = 'a';
-render(current);
+
+visitLocation('a');
