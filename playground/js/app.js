@@ -101,12 +101,20 @@ function parseOneCmd(cmd) {
     
     switch(cmd) {
         case 'look':
-            render(visitedRooms[current], true);
-            break;
+          render(visitedRooms[current], true);
+          break;
+        case 'help':
+          renderHelp();
+          break;
         default:
     }
 }
 
+function renderHelp() {
+  let str = `"Visit(or Goto) Location" to move to a new location\n"Take(or Grab) Item" to pick up/take an item\n"Look" to inspect the current room\n"Help" to list Help instructions`;
+  str.split('\n').map(el => renderPartial(el));
+
+}
 function parseMultiCmd([ cmd, obj ]) {
     switch(cmd) {
         case 'take':
