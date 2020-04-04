@@ -101,7 +101,7 @@ function parseOneCmd(cmd) {
     
     switch(cmd) {
         case 'look':
-            render(current, true);
+            render(visitedRooms[current], true);
             break;
         default:
     }
@@ -126,13 +126,20 @@ function parseMultiCmd([ cmd, obj ]) {
         case 'goto':
         case 'visit':
 
-          if (isValidLocation(obj)) {
+          if (isValidLocation(obj) && obj !== current) {
             if (!visitedRooms[current].routes[obj].locked) {
               visitLocation(obj);
             } else {
               console.log(visitedRooms[current].routes[obj]);
               renderPartial(visitedRooms[current].routes[obj].message);
             }
+          } else {
+            if (current !== obj) {
+              renderPartial(`${obj} is not a Valid Location.`);
+            } else {
+              renderPartial(`You are currently at ${obj}!`);
+            }
+            
           }
           break;
         case 'examine':
