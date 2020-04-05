@@ -1,5 +1,5 @@
 rooms = {
-    'a': {
+    'room a': {
       title: 'Room A',
       status: 'default',
       description: {
@@ -7,7 +7,7 @@ rooms = {
         'closet_unlocked' : 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is now open.'
       },
       routes: {
-        'b':{
+        'room b':{
         locked: false,
         },
         'closet': {
@@ -16,7 +16,7 @@ rooms = {
         }
       },
     },
-    'b': {
+    'room b': {
       title: 'Room B',
       status: 'default',
       description: {
@@ -24,7 +24,7 @@ rooms = {
         'noKey': 'You are in a room. Room A is through the open door to the south.'
       },
       routes: {
-        'a':{
+        'room a':{
         locked: false,
         },
         'closet': {
@@ -41,7 +41,7 @@ rooms = {
         'default': 'You made it into the closet, there are a lot of skeletons in here. There is only one way out to the West, back to Room A.'
       },
       routes: {
-        'a':{
+        'room a':{
         locked: false,
         },
       },
@@ -89,11 +89,24 @@ function renderPartial(str) {
 
 
 function parseInstruction(input) {
-    let arr = input.trim().split(' ');
-    arr = arr.map(item => item.toLowerCase());
-    console.log(arr);
-    if (arr.length === 1) parseOneCmd(arr[0]);
-    else return parseMultiCmd(arr);
+  let cmdExpression = /^[a-z]+/i;
+  let cmd = input.trim().match(cmdExpression);
+  if (cmd) {
+    cmd = cmd[0];
+    input = input.replace(cmd, '').trim().toLowerCase();
+    if (input === '') {
+      parseOneCmd(cmd);
+    } else {
+      console.log(cmd, input);
+      parseMultiCmd(cmd, input);
+    }
+  } else {
+    renderPartial('Please enter a Valid Command.');
+  }
+  // arr = arr.map(item => item.toLowerCase());
+  // console.log(arr);
+  // if (arr.length === 1) parseOneCmd(arr[0]);
+  // else return parseMultiCmd(arr);
   }
   
   
@@ -115,7 +128,7 @@ function renderHelp() {
   str.split('\n').map(el => renderPartial(el));
 
 }
-function parseMultiCmd([ cmd, obj ]) {
+function parseMultiCmd(cmd, obj) {
     switch(cmd) {
         case 'take':
         case 'get':
@@ -207,4 +220,4 @@ playerInput.addEventListener('submit', (e)=> {
 
 
 
-visitLocation('a');
+visitLocation('room a');
