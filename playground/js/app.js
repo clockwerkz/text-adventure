@@ -3,8 +3,8 @@ rooms = {
       title: 'Room A',
       status: 'default',
       description: {
-        'default': 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is closed.',
-        'closet_unlocked' : 'You are in a room. Room B is to the North. To the east, there is a closet. The closet door is now open.'
+        'default': 'You are in a room. Room B is to the North. To the east, there is a closet. The closet is closed.',
+        'closet_unlocked' : 'You are in a room. Room B is to the North. To the east, there is a closet. The closet is now open.'
       },
       routes: {
         'room b':{
@@ -52,14 +52,14 @@ rooms = {
     'key': {
       description: 'A worn out brass key with no other indications on it, appears to be a key for an indoor lock.',
       statusChange: {
-        'a': 'closet_unlocked',
-        'b': 'noKey'
+        'room a': 'closet_unlocked',
+        'room b': 'noKey'
       },
       routeOpen: {
-        'a': 'closet'
+        'room a': 'closet'
       },
       message: {
-        'a':'You unlocked the closet door.'
+        'room a':'You unlocked the closet door.'
       }
     }
   }
@@ -111,16 +111,19 @@ function parseInstruction(input) {
   
   
 function parseOneCmd(cmd) {
-    
-    switch(cmd) {
-        case 'look':
-          render(visitedRooms[current], true);
-          break;
-        case 'help':
-          renderHelp();
-          break;
-        default:
-    }
+  switch(cmd) {
+      case 'look':
+        render(visitedRooms[current], true);
+        break;
+      case 'inventory':
+        let inv = inventory.length === 0 ? 'You have no items' : 'You are carrying: ' + inventory.join(',');
+        renderPartial(inv);
+        break;
+      case 'help':
+        renderHelp();
+        break;
+      default:
+  }
 }
 
 function renderHelp() {
@@ -129,65 +132,66 @@ function renderHelp() {
 
 }
 function parseMultiCmd(cmd, obj) {
-    switch(cmd) {
-        case 'take':
-        case 'get':
-        case 'grab':
-          if (isValidItem(obj)) {
-            console.log(current);
-            inventory.push(obj);
-            renderPartial(`You take the ${obj}.`);
-            visitedRooms[current].status = items[obj].statusChange[current];
-            console.log(visitedRooms[current]);
-        } else {
-            renderPartial(`${obj} is not present here.`);
-        }
-        console.log(inventory);
-        break;
-        case 'goto':
-        case 'visit':
+  switch(cmd) {
+      case 'take':
+      case 'get':
+      case 'grab':
+        if (isValidItem(obj)) {
+          console.log(current);
+          inventory.push(obj);
+          renderPartial(`You take the ${obj}.`);
+          console.log(items[obj]);
+          visitedRooms[current].status = items[obj].statusChange[current];
+          console.log(visitedRooms[current]);
+      } else {
+          renderPartial(`${obj} is not present here.`);
+      }
+      break;
+      case 'goto':
+      case 'visit':
 
-          if (isValidLocation(obj) && obj !== current) {
-            if (!visitedRooms[current].routes[obj].locked) {
-              visitLocation(obj);
-            } else {
-              console.log(visitedRooms[current].routes[obj]);
-              renderPartial(visitedRooms[current].routes[obj].message);
-            }
+        if (isValidLocation(obj) && obj !== current) {
+          if (!visitedRooms[current].routes[obj].locked) {
+            visitLocation(obj);
           } else {
-            if (current !== obj) {
-              renderPartial(`${obj} is not a Valid Location.`);
-            } else {
-              renderPartial(`You are currently at ${obj}!`);
-            }
-            
+            console.log(visitedRooms[current].routes[obj]);
+            renderPartial(visitedRooms[current].routes[obj].message);
+          }
+        } else {
+          if (current !== obj) {
+            renderPartial(`${obj} is not a Valid Location.`);
+          } else {
+            renderPartial(`You are currently at ${obj}!`);
+          }
+          
+        }
+        break;
+      case 'examine':
+      case 'inspect':
+          if (isValidItem(obj)) {
+              renderPartial(items[obj].description);
+          } else {
+              renderPartial(`There is no ${obj} here.`);
           }
           break;
-        case 'examine':
-            if (isValidItem(obj)) {
-                renderPartial(items[obj].description);
-            } else {
-                renderPartial(`There is no ${obj} here.`);
-            }
-            break;
-        case 'use':
-            if (inventory.indexOf(obj)!==-1) {
-              if (items[obj].statusChange.hasOwnProperty(current)) {
-                item = items[obj];
-                if (item.routeOpen.hasOwnProperty(current)) {
-                  let unlockRoom = item.routeOpen[current];
-                  console.log(unlockRoom);
-                  visitedRooms[current].routes[unlockRoom].locked = false;
-                }
-                visitedRooms[current].status = item.statusChange[current];
-                renderPartial(item.message[current]);
+      case 'use':
+          if (inventory.indexOf(obj)!==-1) {
+            if (items[obj].statusChange.hasOwnProperty(current)) {
+              item = items[obj];
+              if (item.routeOpen.hasOwnProperty(current)) {
+                let unlockRoom = item.routeOpen[current];
+                console.log(unlockRoom);
+                visitedRooms[current].routes[unlockRoom].locked = false;
               }
-            } else {
-              renderPartial(`You do not have ${obj}`);
+              visitedRooms[current].status = item.statusChange[current];
+              renderPartial(item.message[current]);
             }
-          break;
-        default:
-    }
+          } else {
+            renderPartial(`You do not have ${obj}`);
+          }
+        break;
+      default:
+  }
 }
 
 function visitLocation(room) {
