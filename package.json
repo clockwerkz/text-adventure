@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/clockwerkz/text-adventure#readme",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^1.2.2",
     "express": "^4.17.3",
     "mongoose": "^5.9.6"
   }
